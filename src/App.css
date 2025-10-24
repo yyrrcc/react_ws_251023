@@ -11,7 +11,16 @@ body {
   border: 1px solid black;
 }
 
+.new-name {
+  padding: 5px;
+  width: 300px;
+  margin-right: 10px;
+  margin-bottom: 20px;
+  background-color: rgb(252, 182, 182);
+}
+
 .new-msg {
+  padding: 5px;
   width: 300px;
   margin-right: 10px;
 }

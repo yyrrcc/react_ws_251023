@@ -5,12 +5,18 @@ function App() {
   const [input, setInput] = useState(""); // 사용자가 입력 중인 메시지
   const ws = useRef(null); // WebSocket 객체(서버와의 실시간 연결)를 저장 할 변수. useRef : 리렌더 돼도 초기화 되지 않는 변수!
   const [messages, setMessages] = useState([]); // 서버에서 온 메시지 리스트(배열)
+  const [name, setName] = useState(""); // 사용자 닉네임
 
   const sendMessage = () => {
-    if (input.trim() === null) {
-      alert("내용을 입력하세요!");
+    if (name.trim() === "") {
+      alert("닉네임을 입력하세요!");
+      return;
+    }
+    if (input.trim() === "") {
+      alert("메시지를 입력하세요!");
+      return;
     } else {
-      ws.current.send(input); // send 메서드 이용해서 input값 전달하기
+      ws.current.send(`${name} : ${input}`); // send 메서드 이용해서 input값 전달하기
       setInput(""); // 전달 후 입력창 초기화
     }
   };
@@ -23,8 +29,13 @@ function App() {
     ws.current.onopen = () => console.log("웹소켓 연결 성공");
     // 메시지 출력해주는 onmessage 메서드. event : 서버가 보낸 한 개의 메시지 이벤트
     ws.current.onmessage = (event) => {
+      // console.log(event.data); // "98de1655-7c01-3117-53bd-b6535da39d96 : 닉네임 : 11"
+      const newMsg = event.data.split(":").slice(1, 3).join(":").trim();
       // prev : 이전까지 쌓인 메시지 배열. event.data : 서버가 보낸 실제 메시지 내용
-      setMessages((prev) => [...prev, event.data]);
+      // setMessages((prev) => [...prev, event.data]);
+
+      // 닉네임 추가된 버전
+      setMessages((prev) => [...prev, newMsg]);
     };
     // [최종정리] input가 event.data가 되고, event.data가 계속 messages 배열에 추가되는 것
 
@@ -36,6 +47,15 @@ function App() {
   return (
     <div className="App">
       <h3>스프링부트 + 리액트 웹소켓 채팅</h3>
+
+      <input
+        text="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="닉네임 입력하세요"
+        className="new-name"
+      />
+
       <div className="msg-list">
         {/* messages 변수를 map을 이용해서 하나씩 꺼내주기 */}
         {messages.map((message, idx) => (
@@ -48,6 +68,7 @@ function App() {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && sendMessage()} // enter 쳐도 메시지 보내질 수 있게
+        placeholder="메시지를 입력하세요"
         className="new-msg"
       />
       <button onClick={sendMessage}>전송</button>
